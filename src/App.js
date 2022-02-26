@@ -1,25 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react'
+import { Formik, Form } from 'formik'
+import Input from './components/Input'
+import Button from './components/Button'
+import Container from './components/Container'
+import Section from './components/Section'
+import Balance from './components/Balance'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const compoundInterest = (deposit, contribution, years, rate) => {
+  let total = deposit;
+
+  for(let i = 0; i < years; i++) {
+    total = (total + contribution) * (rate + 1)
+  }
+  return Math.round(total)
 }
 
-export default App;
+const formatter = new Intl.NumberFormat('es-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})
+
+
+const App =() => {
+  const [balance, setBalance] = useState('')
+  const handleSubmit = ({deposit, contribution, years, rate}) => {
+    const val = compoundInterest(Number(deposit), Number(contribution), Number(years), Number(rate))
+    setBalance(formatter.format(val))
+  }
+  return (
+    <Container>
+      <Section>
+        <Formik
+          initialValues={{
+            deposit: '',
+            contribution: '',
+            years: '',
+            rate: ''
+          }}
+          onSubmit={handleSubmit}
+        >
+          <Form>
+            <Input name='deposit' label='Deposito Inicial' />
+            <Input name='contribution' label='Contribucion Anual' />
+            <Input name='years' label='Años' />
+            <Input name='rate' label='Interes' />
+            <Button>Calcular</Button>
+          </Form>
+        </Formik>
+        {balance !== '' ? <Balance>Balance final: {balance}</Balance> : null}
+      </Section>
+    </Container>
+  )
+}
+
+export default App
